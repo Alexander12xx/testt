@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#0f0f0f">
     <title>Safaricom App Clone</title>
     <link rel="manifest" href="manifest.json">
     <style>
@@ -162,22 +162,50 @@
         .ent-logo.vyb { background: #e8f5e9; color: #4caf50; }
         .ent-label { font-size: 11px; color: var(--text-primary); }
 
-        /* --- Do More with M-PESA --- */
+        /* --- Do More with M-PESA (Improved) --- */
         .do-more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; margin-bottom: 24px; }
-        .do-more-card { background: var(--bg-card-dark); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
+        .do-more-card { 
+            background: var(--bg-card-dark); 
+            border-radius: 16px; 
+            padding: 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            cursor: pointer; 
+            border: 1px solid #2a2a2a;
+            transition: background 0.2s;
+        }
+        .do-more-card:active { background: #252525; }
+        .do-more-icon-row { display: flex; align-items: center; gap: 10px; }
         .do-more-icon { font-size: 24px; }
         .do-more-title { font-size: 14px; font-weight: 600; line-height: 1.2; }
-        .do-more-logos { display: flex; gap: 4px; margin-top: auto; }
-        .do-more-logos div { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; }
-        
+        .do-more-logos { display: flex; gap: 6px; margin-top: auto; align-items: center; }
+        .do-more-logos div { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: bold; border: 1px solid #333; }
+        .do-more-logos .logo-saf { background: #00b84c; color: white; }
+        .do-more-logos .logo-mab { background: #006633; color: white; }
+        .do-more-logos .logo-tz { background: #ffcc00; color: black; }
+        .do-more-logos .logo-cba { background: #003366; color: white; }
+        .do-more-logos .logo-nes { background: #00cc99; color: white; }
+        .do-more-logos .logo-kq { background: #cc0000; color: white; }
+        .do-more-logos .logo-taam { background: #6600cc; color: white; }
+        .do-more-logos .logo-shop { background: #ff6600; color: white; }
+
         /* --- Floating Action Buttons --- */
         .fab-container { position: fixed; bottom: 90px; right: 16px; display: flex; flex-direction: column; gap: 12px; z-index: 90; }
-        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.2s; }
+        .fab { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.2s; }
         .fab:active { transform: scale(0.9); }
         .fab.zuri { background: #1c1c1c; border: 2px solid var(--green-main); overflow: hidden; }
         .fab.zuri img { width: 100%; height: 100%; object-fit: cover; }
-        .fab.scan { background: #2a2a2a; border: 1px solid #333; color: white; font-size: 10px; text-align: center; line-height: 1.1; padding: 4px; }
-        .fab.scan svg { width: 24px; height: 24px; stroke: var(--red-alert); fill: none; stroke-width: 2; margin-bottom: 2px; }
+        
+        /* --- Fixed Scan to Pay Button --- */
+        .scan-fab {
+            position: fixed; bottom: 90px; left: 16px;
+            background: #2a2a2a; border-radius: 24px; padding: 10px 16px;
+            display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; z-index: 90;
+            border: 1px solid #333;
+        }
+        .scan-fab svg { width: 18px; height: 18px; stroke: var(--red-alert); fill: none; stroke-width: 2; }
 
         /* --- Send Money Screen Specifics --- */
         .send-header { display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
@@ -244,7 +272,7 @@
             <div class="balance-card">
                 <div class="balance-title">M-PESA Balance</div>
                 <div class="balance-amount-row">
-                    <div class="balance-amount" id="mpesaBalance">Ksh 125,794.68</div>
+                    <div class="balance-amount" id="mpesaBalance">Ksh 794.68</div>
                     <div class="eye-icon" onclick="toggleBlur('mpesaBalance', this)">
                         <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     </div>
@@ -414,84 +442,102 @@
             </div>
         </div>
 
-        <!-- Do More with M-PESA -->
+        <!-- Do More with M-PESA (Improved) -->
         <div class="section-header">
             <div class="section-title">Do more with M-PESA</div>
         </div>
         <div class="do-more-grid">
             <div class="do-more-card">
-                <div class="do-more-icon">🪙</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">🪙</div>
+                </div>
                 <div class="do-more-title">Financial Services</div>
                 <div class="do-more-logos">
-                    <div style="background: white; color: var(--green-main);">Z</div>
-                    <div style="background: var(--green-dark); color: white;">M</div>
+                    <div class="logo-saf">Z</div>
+                    <div class="logo-mab">M</div>
                 </div>
             </div>
             <div class="do-more-card">
-                <div class="do-more-icon">🛡️</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">🛡️</div>
+                </div>
                 <div class="do-more-title">Insure and Protect</div>
                 <div class="do-more-logos">
-                    <div style="background: #003366; color: white;">C</div>
-                    <div style="background: #ff9900; color: white;">T</div>
+                    <div class="logo-cba">C</div>
+                    <div class="logo-tz">T</div>
                 </div>
             </div>
             <div class="do-more-card">
-                <div class="do-more-icon">🎟️</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">🎟️</div>
+                </div>
                 <div class="do-more-title">Events & Tickets</div>
                 <div class="do-more-logos">
-                    <div style="background: #cc0000; color: white;">T</div>
-                    <div style="background: #6600cc; color: white;">M</div>
+                    <div class="logo-kq">K</div>
+                    <div class="logo-taam">T</div>
                 </div>
             </div>
             <div class="do-more-card">
-                <div class="do-more-icon">⚡</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">⚡</div>
+                </div>
                 <div class="do-more-title">Pay for Utilities</div>
                 <div class="do-more-logos">
-                    <div style="background: #0066cc; color: white;">N</div>
-                    <div style="background: #00cc99; color: white;">K</div>
+                    <div class="logo-nes">N</div>
+                    <div class="logo-saf">S</div>
                 </div>
             </div>
             <div class="do-more-card">
-                <div class="do-more-icon">🎮</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">🎮</div>
+                </div>
                 <div class="do-more-title">Betting</div>
                 <div class="do-more-logos">
-                    <div style="background: #ffcc00; color: black;">S</div>
-                    <div style="background: #003366; color: white;">B</div>
+                    <div class="logo-tz">B</div>
+                    <div class="logo-saf">O</div>
                 </div>
             </div>
             <div class="do-more-card">
-                <div class="do-more-icon">✈️</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">✈️</div>
+                </div>
                 <div class="do-more-title">Book & Travel</div>
                 <div class="do-more-logos">
-                    <div style="background: #cc0000; color: white;">K</div>
-                    <div style="background: #ff9900; color: white;">M</div>
+                    <div class="logo-kq">K</div>
+                    <div class="logo-mab">M</div>
                 </div>
             </div>
             <div class="do-more-card">
-                <div class="do-more-icon">🛍️</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">🛍️</div>
+                </div>
                 <div class="do-more-title">Shop & Gift</div>
                 <div class="do-more-logos">
-                    <div style="background: #ff6600; color: white;">M</div>
-                    <div style="background: #cc00cc; color: white;">Y</div>
+                    <div class="logo-shop">M</div>
+                    <div class="logo-taam">S</div>
                 </div>
             </div>
             <div class="do-more-card">
-                <div class="do-more-icon">💼</div>
+                <div class="do-more-icon-row">
+                    <div class="do-more-icon">💼</div>
+                </div>
                 <div class="do-more-title">Safaricom Business</div>
                 <div class="do-more-logos">
-                    <div style="background: #00b84c; color: white;">S</div>
+                    <div class="logo-saf">S</div>
                 </div>
             </div>
         </div>
 
-        <!-- Floating Action Buttons -->
+        <!-- Scan to Pay Fixed Button (Bottom Left) -->
+        <div class="scan-fab" onclick="alert('Scan to pay')">
+            <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="1"></rect></svg>
+            Scan to pay
+        </div>
+
+        <!-- Zuri AI Assistant Floating Button (Bottom Right) -->
         <div class="fab-container">
             <div class="fab zuri" onclick="alert('Zuri AI Assistant clicked!')">
                 <img src="images/zuri.png" alt="Zuri" onerror="this.style.display='none'; this.parentElement.innerHTML='🤖'; this.parentElement.style.fontSize='24px';">
-            </div>
-            <div class="fab scan" onclick="alert('Scan to pay')">
-                <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="1"></rect></svg>
-                Scan to pay
             </div>
         </div>
     </div>
@@ -602,11 +648,10 @@
             const amountElement = document.getElementById(elementId);
             amountElement.classList.toggle('blurred');
             
-            // Toggle icon opacity or style if needed
             if(amountElement.classList.contains('blurred')) {
-                iconElement.style.color = '#757575'; // Muted when blurred
+                iconElement.style.color = '#757575'; 
             } else {
-                iconElement.style.color = '#b3b3b3'; // Normal when visible
+                iconElement.style.color = '#b3b3b3'; 
             }
         }
 
@@ -674,7 +719,9 @@
             }
         });
 
-        // --- PWA Service Worker Registration ---
+        // --- PWA Service Worker Registration & Install Prompt Logic ---
+        let deferredPrompt;
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
@@ -682,6 +729,17 @@
                 .catch(err => console.log('SW registration failed', err));
             });
         }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            console.log('Install prompt is ready');
+        });
+
+        // Optional: Add a button or logic to trigger the install prompt
+        // For now, it will automatically be handled by the browser if criteria are met.
     </script>
 </body>
 </html>

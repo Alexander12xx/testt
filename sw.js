@@ -1,9 +1,10 @@
-const CACHE_NAME = 'mpesa-clone-v2';
+const CACHE_NAME = 'mpesa-clone-v4';
 const ASSETS = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/images/zuri.png'
+    './',
+    './index.html',
+    './manifest.json',
+    './images/zuri.png',
+    './images/mpesa.png'
 ];
 
 self.addEventListener('install', (e) => {

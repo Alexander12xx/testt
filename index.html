@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0f0f0f">
     <title>Safaricom App Clone</title>
+    <!-- Pointing to the manifest file correctly -->
     <link rel="manifest" href="manifest.json">
     <style>
         :root {
@@ -190,21 +191,53 @@
         .do-more-logos .logo-taam { background: #6600cc; color: white; }
         .do-more-logos .logo-shop { background: #ff6600; color: white; }
 
-        /* --- Floating Action Buttons --- */
-        .fab-container { position: fixed; bottom: 90px; right: 16px; display: flex; flex-direction: column; gap: 12px; z-index: 90; }
-        .fab { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.2s; }
-        .fab:active { transform: scale(0.9); }
-        .fab.zuri { background: #1c1c1c; border: 2px solid var(--green-main); overflow: hidden; }
-        .fab.zuri img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* --- Fixed Scan to Pay Button --- */
-        .scan-fab {
-            position: fixed; bottom: 90px; left: 16px;
-            background: #2a2a2a; border-radius: 24px; padding: 10px 16px;
-            display: flex; align-items: center; gap: 8px; font-weight: 500; font-size: 13px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; z-index: 90;
-            border: 1px solid #333;
+        /* --- Floating Action Buttons (Zuri & Scan) --- */
+        /* The container now stacks them vertically */
+        .fab-container { 
+            position: fixed; 
+            bottom: 100px; 
+            right: 16px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            z-index: 90; 
+            align-items: flex-end; /* Aligns buttons to the right */
         }
+        
+        /* Zuri AI Assistant Button */
+        .fab.zuri { 
+            background: #1c1c1c; 
+            border: 2px solid var(--green-main); 
+            overflow: hidden; 
+            width: 56px; 
+            height: 56px; 
+            border-radius: 50%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+            transition: transform 0.2s;
+        }
+        .fab.zuri:active { transform: scale(0.9); }
+        .fab.zuri img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Scan to Pay Button (Below Zuri) */
+        .scan-fab {
+            background: #2a2a2a; 
+            border-radius: 24px; 
+            padding: 10px 16px;
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-weight: 500; 
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+            cursor: pointer; 
+            border: 1px solid #333;
+            transition: transform 0.2s;
+        }
+        .scan-fab:active { transform: scale(0.95); }
         .scan-fab svg { width: 18px; height: 18px; stroke: var(--red-alert); fill: none; stroke-width: 2; }
 
         /* --- Send Money Screen Specifics --- */
@@ -272,7 +305,8 @@
             <div class="balance-card">
                 <div class="balance-title">M-PESA Balance</div>
                 <div class="balance-amount-row">
-                    <div class="balance-amount" id="mpesaBalance">Ksh 794.68</div>
+                    <!-- Updated Balance Amount -->
+                    <div class="balance-amount" id="mpesaBalance">Ksh 125,748.68</div>
                     <div class="eye-icon" onclick="toggleBlur('mpesaBalance', this)">
                         <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                     </div>
@@ -528,16 +562,16 @@
             </div>
         </div>
 
-        <!-- Scan to Pay Fixed Button (Bottom Left) -->
-        <div class="scan-fab" onclick="alert('Scan to pay')">
-            <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="1"></rect></svg>
-            Scan to pay
-        </div>
-
-        <!-- Zuri AI Assistant Floating Button (Bottom Right) -->
+        <!-- Floating Action Buttons Stack (Zuri & Scan) -->
         <div class="fab-container">
+            <!-- Zuri AI Assistant -->
             <div class="fab zuri" onclick="alert('Zuri AI Assistant clicked!')">
                 <img src="images/zuri.png" alt="Zuri" onerror="this.style.display='none'; this.parentElement.innerHTML='🤖'; this.parentElement.style.fontSize='24px';">
+            </div>
+            <!-- Scan to Pay (Below Zuri) -->
+            <div class="scan-fab" onclick="alert('Scan to pay')">
+                <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="1"></rect></svg>
+                Scan to pay
             </div>
         </div>
     </div>
@@ -588,7 +622,7 @@
                 <input type="number" class="amount-input" placeholder="0" id="amountInput">
                 <span class="currency-label">Ksh</span>
             </div>
-            <div class="balance-hint">Balance: Ksh 794.68</div>
+            <div class="balance-hint">Balance: Ksh 125,748.68</div>
         </div>
 
         <div class="section-title" style="padding: 0 16px; margin-bottom: 12px; font-size: 15px;">Select Payment Method</div>
@@ -599,7 +633,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2zm4 8h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#ff3b30"/></svg>
                     <span>M-PESA</span>
                 </div>
-                <div class="method-balance">Bal. Ksh. 794.68</div>
+                <div class="method-balance">Bal. Ksh. 125,748.68</div>
             </div>
             <div class="method-card" id="method-shiriki" onclick="selectPayment('shiriki')">
                 <div class="method-logo">
@@ -736,10 +770,10 @@
             // Stash the event so it can be triggered later.
             deferredPrompt = e;
             console.log('Install prompt is ready');
+            
+            // Optionally, you can show a custom install button here
+            // For now, we just log it to confirm it's working
         });
-
-        // Optional: Add a button or logic to trigger the install prompt
-        // For now, it will automatically be handled by the browser if criteria are met.
     </script>
 </body>
 </html>

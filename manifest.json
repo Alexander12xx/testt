@@ -1,0 +1,21 @@
+{
+    "name": "M-PESA App Clone",
+    "short_name": "M-PESA",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#0f0f0f",
+    "theme_color": "#0f0f0f",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "images/zuri.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "images/zuri.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212">
+    <title>Safaricom App Clone</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-body: #0f0f0f;
+            --bg-card-dark: #1c1c1c;
+            --bg-input: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #757575;
+            --green-main: #00b84c;
+            --green-dark: #008a39;
+            --border-color: #2a2a2a;
+            --red-alert: #ff3b30;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            padding-bottom: 40px;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Screens & Transitions --- */
+        .screen { display: none; animation: fadeIn 0.3s ease-out; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Global Components --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 16px 10px; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 42px; height: 42px; background: #1a3a26; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; color: var(--green-main); position: relative; }
+        .avatar::after { content: '✔'; position: absolute; bottom: -2px; right: -2px; background: var(--green-main); color: white; font-size: 8px; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-body); }
+        .greeting-text { font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; }
+        .user-name { font-size: 17px; font-weight: 600; }
+        .header-icons { display: flex; gap: 12px; }
+        .icon-btn { background: #232323; border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; transition: 0.2s; }
+        .icon-btn:active { background: #333; }
+        .icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* --- Sliding Balances Section --- */
+        .balances-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 16px 20px; gap: 12px; scrollbar-width: none; }
+        .balances-container::-webkit-scrollbar { display: none; }
+        
+        .balance-card {
+            min-width: 85%;
+            scroll-snap-align: center;
+            background: linear-gradient(145deg, #1c1c1c 0%, #151515 100%);
+            border-radius: 16px;
+            padding: 24px 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+        }
+        .balance-card:active { transform: scale(0.98); }
+
+        /* Geometric pattern overlay */
+        .balance-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.03) 0%, transparent 50%),
+                              linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02)),
+                              linear-gradient(45deg, rgba(255,255,255,0.02) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.02));
+            background-size: 100% 100%, 20px 20px, 20px 20px;
+            background-position: 0 0, 0 0, 10px 10px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Glowing left border */
+        .balance-card::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%;
+            background: linear-gradient(180deg, #00e676 0%, #00b84c 50%, #007bff 100%);
+            border-top-left-radius: 16px; border-bottom-left-radius: 16px;
+        }
+
+        .balance-title { font-size: 14px; color: var(--green-main); font-weight: 500; margin-bottom: 8px; position: relative; z-index: 1; }
+        .balance-amount-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; position: relative; z-index: 1; }
+        .balance-amount { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; transition: filter 0.3s ease; }
+        .balance-amount.blurred { filter: blur(8px); }
+        .eye-icon { color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; }
+        .eye-icon svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+        .btn-outline-green {
+            width: 100%; background: transparent; border: 1px solid var(--green-main); color: var(--green-main);
+            padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+            position: relative; z-index: 1; transition: background 0.2s;
+        }
+        .btn-outline-green:active { background: rgba(0, 184, 76, 0.1); }
+
+        /* Carousel Indicators */
+        .carousel-dots { display: flex; justify-content: center; gap: 6px; margin-top: -10px; margin-bottom: 24px; }
+        .dot { width: 20px; height: 4px; border-radius: 2px; background: #333; transition: 0.3s; }
+        .dot.active { background: var(--green-main); }
+
+        /* --- Section Headers --- */
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 0 16px; margin-bottom: 16px; margin-top: 24px; }
+        .section-title { font-size: 16px; font-weight: 600; }
+        .view-all { color: var(--green-main); font-size: 14px; font-weight: 500; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+        .view-all svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+        /* --- Quick Actions --- */
+        .quick-actions-card { background: var(--bg-card-dark); border-radius: 16px; margin: 0 16px 24px; padding: 24px 10px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 10px; }
+        .action-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .action-icon-circle { width: 52px; height: 52px; background: #2a2a2a; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .action-icon-circle svg { width: 24px; height: 24px; fill: none; stroke: var(--green-main); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+        .action-icon-circle .red-accent { stroke: var(--red-alert); }
+        .action-label { font-size: 11px; text-align: center; color: var(--text-primary); line-height: 1.3; }
+        
+        /* PATA MORE Logo styling */
+        .pata-logo { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 9px; font-weight: 800; line-height: 1; color: var(--green-main); letter-spacing: -0.5px; }
+        .pata-logo span { color: var(--red-alert); }
+
+        /* --- Frequents Section --- */
+        .frequents-card { background: var(--bg-card-dark); border-radius: 16px; margin: 0 16px 24px; padding: 20px 16px; }
+        .frequents-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .chevron-up { color: var(--text-secondary); }
+        .tabs { display: flex; background: #121212; border-radius: 24px; padding: 4px; margin-bottom: 20px; position: relative; }
+        .tab { flex: 1; text-align: center; padding: 10px 0; border-radius: 20px; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; z-index: 1; transition: 0.3s; }
+        .tab.active { background: var(--green-main); color: white; font-weight: 600; }
+        .empty-state { text-align: center; padding: 20px 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+        .explore-apps { color: var(--green-main); font-weight: 500; margin-top: 12px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+
+        /* --- Explore & Discover Deals --- */
+        .banner { margin: 0 16px 24px; background: linear-gradient(90deg, #003d1a, #006633); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; position: relative; overflow: hidden; }
+        .banner::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .banner-text { font-size: 14px; font-weight: 700; line-height: 1.2; color: white; position: relative; z-index: 1; }
+        .banner-sub { font-size: 11px; color: #ccc; margin-top: 4px; position: relative; z-index: 1; }
+        .banner-logo { font-size: 24px; position: relative; z-index: 1; }
+
+        /* --- My Finances --- */
+        .finances-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 0 16px; margin-bottom: 24px; }
+        .finance-card { background: var(--bg-card-dark); border-radius: 12px; padding: 16px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+        .finance-logo { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
+        .finance-logo.ziidi-trader { background: #1c3a24; color: var(--green-main); border: 1px solid var(--green-dark); }
+        .finance-logo.ziidi-invest { background: white; color: var(--green-main); }
+        .finance-logo.ziidi-shariah { background: var(--green-main); color: white; }
+        .finance-logo.tuunza { background: #2a2a2a; color: var(--text-secondary); font-size: 10px; text-align: center; line-height: 1.1; }
+        .finance-label { font-size: 11px; text-align: center; color: var(--text-primary); line-height: 1.2; }
+
+        /* --- Entertainment --- */
+        .entertainment-grid { display: flex; gap: 12px; overflow-x: auto; padding: 0 16px 24px; scrollbar-width: none; }
+        .entertainment-grid::-webkit-scrollbar { display: none; }
+        .ent-card { min-width: 80px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .ent-logo { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; }
+        .ent-logo.baze { background: #ffebee; color: #e91e63; }
+        .ent-logo.games { background: #fff3e0; color: #ff9800; font-size: 24px; }
+        .ent-logo.news { background: #e3f2fd; color: #1976d2; font-size: 10px; }
+        .ent-logo.skiza { background: #f3e5f5; color: #9c27b0; }
+        .ent-logo.vyb { background: #e8f5e9; color: #4caf50; }
+        .ent-label { font-size: 11px; color: var(--text-primary); }
+
+        /* --- Do More with M-PESA --- */
+        .do-more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 16px; margin-bottom: 24px; }
+        .do-more-card { background: var(--bg-card-dark); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
+        .do-more-icon { font-size: 24px; }
+        .do-more-title { font-size: 14px; font-weight: 600; line-height: 1.2; }
+        .do-more-logos { display: flex; gap: 4px; margin-top: auto; }
+        .do-more-logos div { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; }
+        
+        /* --- Floating Action Buttons --- */
+        .fab-container { position: fixed; bottom: 90px; right: 16px; display: flex; flex-direction: column; gap: 12px; z-index: 90; }
+        .fab { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.2s; }
+        .fab:active { transform: scale(0.9); }
+        .fab.zuri { background: #1c1c1c; border: 2px solid var(--green-main); overflow: hidden; }
+        .fab.zuri img { width: 100%; height: 100%; object-fit: cover; }
+        .fab.scan { background: #2a2a2a; border: 1px solid #333; color: white; font-size: 10px; text-align: center; line-height: 1.1; padding: 4px; }
+        .fab.scan svg { width: 24px; height: 24px; stroke: var(--red-alert); fill: none; stroke-width: 2; margin-bottom: 2px; }
+
+        /* --- Send Money Screen Specifics --- */
+        .send-header { display: flex; align-items: center; justify-content: center; padding: 20px; position: relative; }
+        .back-btn { position: absolute; left: 16px; background: none; border: none; color: white; font-size: 24px; cursor: pointer; display: flex; align-items: center; }
+        .toggle-container { background: #1c1c1c; border-radius: 30px; padding: 4px; margin: 0 16px 24px; display: flex; }
+        .toggle-btn { flex: 1; text-align: center; padding: 12px; border-radius: 26px; font-size: 14px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: 0.3s; }
+        .toggle-btn.active { background: var(--green-main); color: white; }
+        .favourites-section { padding: 0 16px; margin-bottom: 24px; }
+        .fav-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .fav-title { font-size: 15px; font-weight: 600; }
+        .add-fav { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+        .add-icon-circle { width: 44px; height: 44px; background: #1c1c1c; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--green-main); font-size: 20px; border: 1px dashed #444; }
+        .add-label { font-size: 11px; color: var(--text-secondary); }
+        .form-group { padding: 0 16px; margin-bottom: 20px; }
+        .form-label { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; display: block; }
+        .input-wrapper { display: flex; align-items: center; background: var(--bg-input); border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; gap: 12px; }
+        .input-wrapper input { background: transparent; border: none; color: white; font-size: 16px; width: 100%; outline: none; }
+        .input-wrapper input::placeholder { color: #555; }
+        .input-icons { display: flex; align-items: center; gap: 12px; }
+        .input-icons svg { width: 22px; height: 22px; stroke: var(--green-main); fill: none; stroke-width: 2; }
+        .input-icons .divider { width: 1px; height: 24px; background: #333; }
+        .input-icons .qr-icon { stroke: var(--red-alert); }
+        .amount-input { font-size: 24px !important; font-weight: 600; }
+        .currency-label { color: var(--text-secondary); font-size: 16px; font-weight: 500; }
+        .balance-hint { font-size: 12px; color: var(--text-secondary); margin-top: 8px; padding-left: 4px; }
+        .payment-methods { display: flex; gap: 12px; padding: 0 16px; margin-bottom: 24px; }
+        .method-card { flex: 1; background: var(--bg-card-dark); border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; position: relative; cursor: pointer; transition: 0.2s; }
+        .method-card.selected { border-color: var(--green-main); background: rgba(0, 184, 76, 0.05); }
+        .method-card.selected::after { content: '✔'; position: absolute; top: 0; right: 0; background: var(--green-main); color: white; font-size: 10px; width: 20px; height: 20px; border-radius: 0 12px 0 8px; display: flex; align-items: center; justify-content: center; }
+        .method-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .method-balance { font-size: 11px; color: var(--text-secondary); }
+        .method-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .method-logo span { font-weight: bold; }
+        .btn-continue { width: calc(100% - 32px); margin: 0 16px; background: #2a2a2a; color: #666; border: none; padding: 16px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: not-allowed; transition: 0.3s; }
+        .btn-continue.active { background: var(--green-main); color: white; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+    <!-- ==================== SCREEN 1: HOME ==================== -->
+    <div id="screen-home" class="screen active">
+        <div class="header">
+            <div class="header-left">
+                <div class="avatar">AM</div>
+                <div>
+                    <div class="greeting-text">Good evening,</div>
+                    <div class="user-name">Alexander 👋</div>
+                </div>
+            </div>
+            <div class="header-icons">
+                <button class="icon-btn" onclick="alert('Notifications')">
+                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                </button>
+                <button class="icon-btn" onclick="alert('Search')">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Balances Carousel -->
+        <div class="balances-container">
+            <!-- M-PESA Balance Card -->
+            <div class="balance-card">
+                <div class="balance-title">M-PESA Balance</div>
+                <div class="balance-amount-row">
+                    <div class="balance-amount" id="mpesaBalance">Ksh 125,794.68</div>
+                    <div class="eye-icon" onclick="toggleBlur('mpesaBalance', this)">
+                        <svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    </div>
+                </div>
+                <button class="btn-outline-green" onclick="alert('View Statements')">View Statements</button>
+            </div>
+
+            <!-- Airtime Balance Card (Partial) -->
+            <div class="balance-card">
+                <div class="balance-title">My Balances</div>
+                <div class="balance-amount-row" style="margin-bottom: 12px;">
+                    <div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 4px;">Airtime</div>
+                        <div class="balance-amount" id="airtimeBalance">Ksh. 0</div>
+                    </div>
+                </div>
+                <button class="btn-outline-green" onclick="alert('View All Balances')">View All Balances</button>
+            </div>
+        </div>
+        
+        <!-- Carousel Indicators -->
+        <div class="carousel-dots">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions-card">
+            <div class="section-header" style="padding: 0; margin-bottom: 20px; margin-top: 0;">
+                <div class="section-title">Quick Actions</div>
+                <a href="#" class="view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></a>
+            </div>
+            
+            <div class="grid-4">
+                <div class="action-item" onclick="switchTab('send')">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M22 2L11 13"></path><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </div>
+                    <div class="action-label">Send<br>Money</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24" class="red-accent"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    </div>
+                    <div class="action-label">Lipa na<br>M-PESA</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><polyline points="8 12 12 16 16 12" class="red-accent"></polyline></svg>
+                    </div>
+                    <div class="action-label">Withdraw<br>Money</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-icon-circle">
+                        <div class="pata-logo">PATA<br><span>MORE</span></div>
+                    </div>
+                    <div class="action-label">Buy<br>Bundles</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M4.93 4.93l14.14 14.14" class="red-accent"></path></svg>
+                    </div>
+                    <div class="action-label">International<br>Transfer</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path><polyline points="15 3 21 3 21 9" class="red-accent"></polyline></svg>
+                    </div>
+                    <div class="action-label">Airtime<br>Top Up</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0" class="red-accent"></path></svg>
+                    </div>
+                    <div class="action-label">Tunukiwa<br>Bundles</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-icon-circle">
+                        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" class="red-accent" style="fill: var(--red-alert); stroke: none;"></path></svg>
+                    </div>
+                    <div class="action-label">Home<br>Internet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Frequents Section -->
+        <div class="frequents-card">
+            <div class="frequents-header">
+                <div class="section-title">Frequents</div>
+                <div class="chevron-up">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                </div>
+            </div>
+            <div class="tabs">
+                <div class="tab active">Apps</div>
+                <div class="tab">Send</div>
+                <div class="tab">Pay</div>
+                <div class="tab">Bundles</div>
+            </div>
+            <div class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2" style="margin-bottom: 10px;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="17" y1="17" x2="21" y2="21"></line><line x1="21" y1="17" x2="17" y2="21"></line></svg>
+                <br>It looks like you're starting fresh here. See the services we offer.<br>
+                <span class="explore-apps">Explore Apps →</span>
+            </div>
+        </div>
+
+        <!-- Explore & Discover Deals -->
+        <div class="section-header">
+            <div class="section-title">Explore & Discover Deals 🔥</div>
+        </div>
+        <div class="banner" style="margin-top: 0;">
+            <div>
+                <div class="banner-text">PATA MORE NA MY ONEAPP</div>
+                <div class="banner-sub">Book your next Kenya Airways flight and save up to 15%</div>
+            </div>
+            <div class="banner-logo">✈️</div>
+        </div>
+
+        <!-- My Finances -->
+        <div class="section-header">
+            <div class="section-title">My Finances</div>
+            <a href="#" class="view-all">View all <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></a>
+        </div>
+        <div class="finances-grid">
+            <div class="finance-card">
+                <div class="finance-logo ziidi-trader">ZiiDi</div>
+                <div class="finance-label">ZiiDi<br>Trader</div>
+            </div>
+            <div class="finance-card">
+                <div class="finance-logo ziidi-invest">ZiiDi</div>
+                <div class="finance-label">ZiiDi<br>Invest & Save</div>
+            </div>
+            <div class="finance-card">
+                <div class="finance-logo ziidi-shariah">ZiiDi</div>
+                <div class="finance-label">ZiiDi<br>Shariah</div>
+            </div>
+            <div class="finance-card">
+                <div class="finance-logo tuunza">TUUNZA<br>MAPATO</div>
+                <div class="finance-label">Tuunza<br>Mapato</div>
+            </div>
+        </div>
+
+        <!-- Entertainment -->
+        <div class="section-header">
+            <div class="section-title">Entertainment</div>
+        </div>
+        <div class="entertainment-grid">
+            <div class="ent-card">
+                <div class="ent-logo baze">Baze</div>
+                <div class="ent-label">Baze</div>
+            </div>
+            <div class="ent-card">
+                <div class="ent-logo games">🎮</div>
+                <div class="ent-label">Games</div>
+            </div>
+            <div class="ent-card">
+                <div class="ent-logo news">NEWS<br>PAPER</div>
+                <div class="ent-label">Newspaper</div>
+            </div>
+            <div class="ent-card">
+                <div class="ent-logo skiza">Skiza</div>
+                <div class="ent-label">Skiza</div>
+            </div>
+            <div class="ent-card">
+                <div class="ent-logo vyb">Vyb</div>
+                <div class="ent-label">Vyb</div>
+            </div>
+        </div>
+
+        <!-- Do More with M-PESA -->
+        <div class="section-header">
+            <div class="section-title">Do more with M-PESA</div>
+        </div>
+        <div class="do-more-grid">
+            <div class="do-more-card">
+                <div class="do-more-icon">🪙</div>
+                <div class="do-more-title">Financial Services</div>
+                <div class="do-more-logos">
+                    <div style="background: white; color: var(--green-main);">Z</div>
+                    <div style="background: var(--green-dark); color: white;">M</div>
+                </div>
+            </div>
+            <div class="do-more-card">
+                <div class="do-more-icon">🛡️</div>
+                <div class="do-more-title">Insure and Protect</div>
+                <div class="do-more-logos">
+                    <div style="background: #003366; color: white;">C</div>
+                    <div style="background: #ff9900; color: white;">T</div>
+                </div>
+            </div>
+            <div class="do-more-card">
+                <div class="do-more-icon">🎟️</div>
+                <div class="do-more-title">Events & Tickets</div>
+                <div class="do-more-logos">
+                    <div style="background: #cc0000; color: white;">T</div>
+                    <div style="background: #6600cc; color: white;">M</div>
+                </div>
+            </div>
+            <div class="do-more-card">
+                <div class="do-more-icon">⚡</div>
+                <div class="do-more-title">Pay for Utilities</div>
+                <div class="do-more-logos">
+                    <div style="background: #0066cc; color: white;">N</div>
+                    <div style="background: #00cc99; color: white;">K</div>
+                </div>
+            </div>
+            <div class="do-more-card">
+                <div class="do-more-icon">🎮</div>
+                <div class="do-more-title">Betting</div>
+                <div class="do-more-logos">
+                    <div style="background: #ffcc00; color: black;">S</div>
+                    <div style="background: #003366; color: white;">B</div>
+                </div>
+            </div>
+            <div class="do-more-card">
+                <div class="do-more-icon">✈️</div>
+                <div class="do-more-title">Book & Travel</div>
+                <div class="do-more-logos">
+                    <div style="background: #cc0000; color: white;">K</div>
+                    <div style="background: #ff9900; color: white;">M</div>
+                </div>
+            </div>
+            <div class="do-more-card">
+                <div class="do-more-icon">🛍️</div>
+                <div class="do-more-title">Shop & Gift</div>
+                <div class="do-more-logos">
+                    <div style="background: #ff6600; color: white;">M</div>
+                    <div style="background: #cc00cc; color: white;">Y</div>
+                </div>
+            </div>
+            <div class="do-more-card">
+                <div class="do-more-icon">💼</div>
+                <div class="do-more-title">Safaricom Business</div>
+                <div class="do-more-logos">
+                    <div style="background: #00b84c; color: white;">S</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Action Buttons -->
+        <div class="fab-container">
+            <div class="fab zuri" onclick="alert('Zuri AI Assistant clicked!')">
+                <img src="images/zuri.png" alt="Zuri" onerror="this.style.display='none'; this.parentElement.innerHTML='🤖'; this.parentElement.style.fontSize='24px';">
+            </div>
+            <div class="fab scan" onclick="alert('Scan to pay')">
+                <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="1"></rect></svg>
+                Scan to pay
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 2: SEND MONEY ==================== -->
+    <div id="screen-send" class="screen">
+        <div class="send-header">
+            <button class="back-btn" onclick="switchTab('home')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div class="section-title" style="font-size: 18px;">Send Money</div>
+        </div>
+
+        <!-- Top Toggle -->
+        <div class="toggle-container">
+            <div class="toggle-btn active">Mobile number</div>
+            <div class="toggle-btn">Pochi la Biashara</div>
+        </div>
+
+        <!-- Favourites -->
+        <div class="favourites-section">
+            <div class="fav-header">
+                <div class="fav-title">Favourites</div>
+                <a href="#" class="view-all" style="font-size: 13px;">View All</a>
+            </div>
+            <div class="add-fav">
+                <div class="add-icon-circle">+</div>
+                <div class="add-label">Add</div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="form-group">
+            <label class="form-label">Enter Phone Number</label>
+            <div class="input-wrapper">
+                <input type="tel" placeholder="Enter Phone Number" id="phoneInput">
+                <div class="input-icons">
+                    <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    <div class="divider"></div>
+                    <svg class="qr-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Enter Amount</label>
+            <div class="input-wrapper">
+                <input type="number" class="amount-input" placeholder="0" id="amountInput">
+                <span class="currency-label">Ksh</span>
+            </div>
+            <div class="balance-hint">Balance: Ksh 794.68</div>
+        </div>
+
+        <div class="section-title" style="padding: 0 16px; margin-bottom: 12px; font-size: 15px;">Select Payment Method</div>
+        
+        <div class="payment-methods">
+            <div class="method-card selected" id="method-mpesa" onclick="selectPayment('mpesa')">
+                <div class="method-logo">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2zm4 8h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#ff3b30"/></svg>
+                    <span>M-PESA</span>
+                </div>
+                <div class="method-balance">Bal. Ksh. 794.68</div>
+            </div>
+            <div class="method-card" id="method-shiriki" onclick="selectPayment('shiriki')">
+                <div class="method-logo">
+                    <div style="width: 20px; height: 20px; background: #006633; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white;">S</div>
+                    <span>Shiriki Pay</span>
+                </div>
+                <div class="method-balance">Select</div>
+            </div>
+        </div>
+
+        <button class="btn-continue" id="continueBtn">Continue</button>
+
+        <!-- Do More (Send Money Specific) -->
+        <div class="section-title" style="padding: 0 16px; margin-top: 24px; margin-bottom: 12px; font-size: 15px;">Do More</div>
+        <div class="do-more-grid">
+            <div class="do-more-card">
+                <svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke: var(--green-main); fill:none; stroke-width:2;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <div class="do-more-title" style="font-size:13px;">Send to Many</div>
+            </div>
+            <div class="do-more-card">
+                <svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke: var(--green-main); fill:none; stroke-width:2;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline><path d="M12 18v-6"></path><polyline points="9 15 12 18 15 15"></polyline></svg>
+                <div class="do-more-title" style="font-size:13px;">Request Money</div>
+            </div>
+            <div class="do-more-card">
+                <svg viewBox="0 0 24 24" style="width:24px; height:24px; stroke: var(--green-main); fill:none; stroke-width:2;"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v12"></path><path d="M15 9.5c0-1.4-1.3-2.5-3-2.5s-3 1.1-3 2.5 1.3 2.5 3 2.5 3 1.1 3 2.5-1.3 2.5-3 2.5-3-1.1-3-2.5"></path></svg>
+                <div class="do-more-title" style="font-size:13px;">Invest to ZiiDi</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPT ==================== -->
+    <script>
+        // --- Screen Navigation Logic ---
+        function switchTab(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            if(screenId === 'home') {
+                document.getElementById('screen-home').classList.add('active');
+            } else if (screenId === 'send') {
+                document.getElementById('screen-send').classList.add('active');
+            }
+            window.scrollTo(0,0);
+        }
+
+        // --- Balance Blurring Logic ---
+        function toggleBlur(elementId, iconElement) {
+            const amountElement = document.getElementById(elementId);
+            amountElement.classList.toggle('blurred');
+            
+            // Toggle icon opacity or style if needed
+            if(amountElement.classList.contains('blurred')) {
+                iconElement.style.color = '#757575'; // Muted when blurred
+            } else {
+                iconElement.style.color = '#b3b3b3'; // Normal when visible
+            }
+        }
+
+        // --- Payment Method Selection ---
+        function selectPayment(method) {
+            const mpesaCard = document.getElementById('method-mpesa');
+            const shirikiCard = document.getElementById('method-shiriki');
+            
+            if(method === 'mpesa') {
+                mpesaCard.classList.add('selected');
+                shirikiCard.classList.remove('selected');
+            } else {
+                shirikiCard.classList.add('selected');
+                mpesaCard.classList.remove('selected');
+            }
+        }
+
+        // --- Form Validation Logic ---
+        const phoneInput = document.getElementById('phoneInput');
+        const amountInput = document.getElementById('amountInput');
+        const continueBtn = document.getElementById('continueBtn');
+
+        function validateForm() {
+            if(phoneInput.value.trim().length >= 9 && amountInput.value > 0) {
+                continueBtn.classList.add('active');
+                continueBtn.disabled = false;
+            } else {
+                continueBtn.classList.remove('active');
+                continueBtn.disabled = true;
+            }
+        }
+
+        phoneInput.addEventListener('input', validateForm);
+        amountInput.addEventListener('input', validateForm);
+
+        // --- Top Toggle Logic ---
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // --- Top Tabs Logic ---
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // --- Carousel Dot Sync ---
+        const container = document.querySelector('.balances-container');
+        const dots = document.querySelectorAll('.dot');
+        
+        container.addEventListener('scroll', () => {
+            const scrollPos = container.scrollLeft;
+            const cardWidth = container.offsetWidth * 0.85;
+            if (scrollPos > cardWidth / 2) {
+                dots[0].classList.remove('active');
+                dots[1].classList.add('active');
+            } else {
+                dots[1].classList.remove('active');
+                dots[0].classList.add('active');
+            }
+        });
+
+        // --- PWA Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW registration failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
